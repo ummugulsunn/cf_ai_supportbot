@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Support Bot - Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .demo-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .demo-title {
+            font-size: 2.5rem;
+            color: #4f46e5;
+            margin-bottom: 0.5rem;
+        }
+        .demo-subtitle {
+            font-size: 1.25rem;
+            color: #6b7280;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        .feature-card {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #4f46e5;
+        }
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        .feature-description {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        .chat-demo {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .demo-note {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        .demo-note strong {
+            color: #92400e;
+        }
+        .launch-button {
+            display: inline-block;
+            background: #4f46e5;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .launch-button:hover {
+            background: #4338ca;
+        }
+        .tech-stack {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        .tech-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .tech-item {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1 class="demo-title">🤖 AI Support Bot</h1>
+            <p class="demo-subtitle">Intelligent customer support powered by Cloudflare's edge infrastructure</p>
+        </div>
+
+        <div class="demo-note">
+            <strong>Demo Note:</strong> This is a frontend demonstration of the AI Support Bot interface. 
+            The backend WebSocket server needs to be running for full functionality. 
+            You can still explore the UI components and voice features.
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3 class="feature-title">🚀 Real-time Chat</h3>
+                <p class="feature-description">
+                    WebSocket-powered real-time communication with automatic reconnection and typing indicators.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <h3 class="feature-title">🎤 Voice Input</h3>
+                <p class="feature-description">
+                    Speech-to-text input with browser-native Web Speech API integration and graceful fallbacks.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <h3 class="feature-title">🧠 AI Memory</h3>
+                <p class="feature-description">
+                    Session-based conversation memory using Cloudflare Durable Objects for context persistence.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <h3 class="feature-title">🔧 Tool Integration</h3>
+                <p class="feature-description">
+                    Knowledge base search and ticketing system integration with visual tool call indicators.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <h3 class="feature-title">📱 Responsive Design</h3>
+                <p class="feature-description">
+                    Mobile-first responsive design with accessibility features and reduced motion support.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <h3 class="feature-title">⚡ Edge Computing</h3>
+                <p class="feature-description">
+                    Deployed on Cloudflare's global edge network for ultra-low latency responses worldwide.
+                </p>
+            </div>
+        </div>
+
+        <div class="chat-demo">
+            <h2 style="margin-bottom: 1rem; color: #1f2937;">Interactive Demo</h2>
+            <p style="color: #6b7280; margin-bottom: 1.5rem;">
+                Experience the full chat interface with real-time messaging, voice input, and AI responses.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <a href="index.html" class="launch-button" style="text-align: center; display: block;">
+                    🚀 Launch Chat Interface
+                </a>
+                <a href="voice-test.html" class="launch-button" style="text-align: center; display: block; background: #059669;">
+                    🎤 Test Voice Features
+                </a>
+            </div>
+            
+            <div style="background: #f3f4f6; padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
+                <h3 style="margin-bottom: 1rem; color: #1f2937;">Demo Scenarios</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div style="background: white; padding: 1rem; border-radius: 6px;">
+                        <h4 style="color: #4f46e5; margin-bottom: 0.5rem;">💬 Basic Chat</h4>
+                        <p style="font-size: 0.875rem; color: #6b7280;">Try: "Hello, I need help with my account"</p>
+                    </div>
+                    <div style="background: white; padding: 1rem; border-radius: 6px;">
+                        <h4 style="color: #4f46e5; margin-bottom: 0.5rem;">🔍 Knowledge Search</h4>
+                        <p style="font-size: 0.875rem; color: #6b7280;">Try: "How do I reset my password?"</p>
+                    </div>
+                    <div style="background: white; padding: 1rem; border-radius: 6px;">
+                        <h4 style="color: #4f46e5; margin-bottom: 0.5rem;">🎫 Create Ticket</h4>
+                        <p style="font-size: 0.875rem; color: #6b7280;">Try: "I need to report a billing issue"</p>
+                    </div>
+                    <div style="background: white; padding: 1rem; border-radius: 6px;">
+                        <h4 style="color: #4f46e5; margin-bottom: 0.5rem;">🎤 Voice Input</h4>
+                        <p style="font-size: 0.875rem; color: #6b7280;">Click the microphone and speak your question</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tech-stack">
+            <h3 style="color: #1f2937; margin-bottom: 1rem;">Technology Stack</h3>
+            <div class="tech-list">
+                <span class="tech-item">React 18</span>
+                <span class="tech-item">WebSocket API</span>
+                <span class="tech-item">Web Speech API</span>
+                <span class="tech-item">Cloudflare Workers</span>
+                <span class="tech-item">Durable Objects</span>
+                <span class="tech-item">Workers AI</span>
+                <span class="tech-item">Llama 3.3 70B</span>
+                <span class="tech-item">TypeScript</span>
+                <span class="tech-item">Vitest</span>
+                <span class="tech-item">Responsive CSS</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,12 +1,15 @@
+# Cloudflare AI Support Bot Configuration
 name = "cf-ai-supportbot"
 main = "workers/api.ts"
 compatibility_date = "2024-10-01"
 
-[env.production]
-name = "cf-ai-supportbot"
-
-[env.staging]
-name = "cf-ai-supportbot-staging"
+# Default (Development) Environment
+[vars]
+ENVIRONMENT = "development"
+MAX_TOKENS = "2048"
+RATE_LIMIT_PER_MINUTE = "30"
+SESSION_TTL_HOURS = "2"
+LOG_LEVEL = "debug"
 
 # AI Model binding
 [ai]
@@ -15,33 +18,85 @@ binding = "AI"
 # Durable Objects
 [[durable_objects.bindings]]
 name = "MEMORY_DO"
-class_name = "MemoryDurableObject"
+class_name = "SessionMemoryDO"
 script_name = "cf-ai-supportbot"
 
-# KV Storage for caching
+# KV Storage for caching (development)
 [[kv_namespaces]]
 binding = "CHAT_KV"
-id = "your-kv-namespace-id"
-preview_id = "your-preview-kv-namespace-id"
+id = "your-dev-kv-namespace-id"
+preview_id = "your-dev-preview-kv-namespace-id"
 
-# R2 Storage for archives
+# R2 Storage for archives (development)
 [[r2_buckets]]
 binding = "ARCHIVE_R2"
-bucket_name = "cf-ai-supportbot-archives"
-preview_bucket_name = "cf-ai-supportbot-archives-preview"
+bucket_name = "cf-ai-supportbot-dev-archives"
+preview_bucket_name = "cf-ai-supportbot-dev-archives-preview"
 
-# Workflows
-[workflows]
+# Workflows for orchestration
+[[workflows]]
 binding = "WORKFLOWS"
+name = "support-workflow"
+class_name = "SupportWorkflow"
 
-# Environment variables
-[vars]
-ENVIRONMENT = "development"
+# Staging Environment
+[env.staging]
+name = "cf-ai-supportbot-staging"
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
 MAX_TOKENS = "4096"
 RATE_LIMIT_PER_MINUTE = "60"
+SESSION_TTL_HOURS = "12"
+LOG_LEVEL = "info"
+
+[[env.staging.kv_namespaces]]
+binding = "CHAT_KV"
+id = "your-staging-kv-namespace-id"
+preview_id = "your-staging-preview-kv-namespace-id"
+
+[[env.staging.r2_buckets]]
+binding = "ARCHIVE_R2"
+bucket_name = "cf-ai-supportbot-staging-archives"
+preview_bucket_name = "cf-ai-supportbot-staging-archives-preview"
+
+[[env.staging.durable_objects.bindings]]
+name = "MEMORY_DO"
+class_name = "SessionMemoryDO"
+script_name = "cf-ai-supportbot-staging"
+
+# Production Environment
+[env.production]
+name = "cf-ai-supportbot"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+MAX_TOKENS = "4096"
+RATE_LIMIT_PER_MINUTE = "100"
 SESSION_TTL_HOURS = "24"
+LOG_LEVEL = "warn"
+
+[[env.production.kv_namespaces]]
+binding = "CHAT_KV"
+id = "your-prod-kv-namespace-id"
+preview_id = "your-prod-preview-kv-namespace-id"
+
+[[env.production.r2_buckets]]
+binding = "ARCHIVE_R2"
+bucket_name = "cf-ai-supportbot-prod-archives"
+preview_bucket_name = "cf-ai-supportbot-prod-archives-preview"
+
+[[env.production.durable_objects.bindings]]
+name = "MEMORY_DO"
+class_name = "SessionMemoryDO"
+script_name = "cf-ai-supportbot"
 
 # Secrets (set via wrangler secret put)
-# OPENAI_API_KEY = "your-openai-api-key"
-# KNOWLEDGE_BASE_API_KEY = "your-kb-api-key"
-# TICKETING_API_KEY = "your-ticketing-api-key"
+# Development: wrangler secret put OPENAI_API_KEY --name cf-ai-supportbot
+# Staging: wrangler secret put OPENAI_API_KEY --name cf-ai-supportbot-staging --env staging
+# Production: wrangler secret put OPENAI_API_KEY --name cf-ai-supportbot --env production
+#
+# Required secrets:
+# - OPENAI_API_KEY: OpenAI API key for fallback model
+# - KNOWLEDGE_BASE_API_KEY: API key for knowledge base integration
+# - TICKETING_API_KEY: API key for ticketing system integration

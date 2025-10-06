@@ -1,0 +1,199 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run TypeScript build
+      run: npm run build
+      
+    - name: Run tests
+      run: npm run test:run
+      
+    - name: Run tests with coverage
+      run: npm run test:coverage
+      
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        fail_ci_if_error: false
+
+  lint:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run TypeScript check
+      run: npx tsc --noEmit
+      
+    - name: Check for security vulnerabilities
+      run: npm audit --audit-level moderate
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Setup Wrangler
+      uses: cloudflare/wrangler-action@v3
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        
+    - name: Deploy to staging
+      run: |
+        # Set up secrets for staging environment
+        echo "${{ secrets.OPENAI_API_KEY }}" | wrangler secret put OPENAI_API_KEY --name cf-ai-supportbot-staging
+        echo "${{ secrets.KNOWLEDGE_BASE_API_KEY }}" | wrangler secret put KNOWLEDGE_BASE_API_KEY --name cf-ai-supportbot-staging
+        echo "${{ secrets.TICKETING_API_KEY }}" | wrangler secret put TICKETING_API_KEY --name cf-ai-supportbot-staging
+        
+        # Deploy using our script
+        ./deploy.sh staging --skip-tests
+        
+    - name: Run deployment verification
+      run: |
+        # Wait for deployment to be ready
+        sleep 30
+        
+        # Run comprehensive verification
+        ./scripts/verify-deployment.sh staging --detailed
+        
+    - name: Notify deployment
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Setup Wrangler
+      uses: cloudflare/wrangler-action@v3
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        
+    - name: Deploy to production
+      run: |
+        # Set up secrets for production environment
+        echo "${{ secrets.OPENAI_API_KEY }}" | wrangler secret put OPENAI_API_KEY --name cf-ai-supportbot
+        echo "${{ secrets.KNOWLEDGE_BASE_API_KEY }}" | wrangler secret put KNOWLEDGE_BASE_API_KEY --name cf-ai-supportbot
+        echo "${{ secrets.TICKETING_API_KEY }}" | wrangler secret put TICKETING_API_KEY --name cf-ai-supportbot
+        
+        # Deploy using our script
+        ./deploy.sh production --skip-tests
+        
+    - name: Run production verification
+      run: |
+        # Wait for deployment to be ready
+        sleep 30
+        
+        # Run comprehensive verification
+        ./scripts/verify-deployment.sh production --detailed
+        
+    - name: Create deployment tag
+      if: success()
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git tag -a "v$(date +'%Y%m%d-%H%M%S')" -m "Production deployment $(date)"
+        git push origin --tags
+        
+    - name: Notify deployment
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'

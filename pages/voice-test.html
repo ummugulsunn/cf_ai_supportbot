@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Features Test - AI Support Bot</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        .test-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .test-title {
+            font-size: 2rem;
+            color: #4f46e5;
+            margin-bottom: 0.5rem;
+        }
+        .test-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .test-section h3 {
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        .support-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+        .status-indicator.supported {
+            background: #10b981;
+        }
+        .test-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .test-button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            background: #4f46e5;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .test-button:hover:not(:disabled) {
+            background: #4338ca;
+        }
+        .test-button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        .test-button.recording {
+            background: #ef4444;
+            animation: pulse 1s infinite;
+        }
+        .test-output {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 1rem;
+            min-height: 100px;
+            font-family: monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+        }
+        .tts-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .tts-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .back-link {
+            display: inline-block;
+            color: #4f46e5;
+            text-decoration: none;
+            margin-bottom: 1rem;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <a href="index.html" class="back-link">← Back to Chat</a>
+        
+        <div class="test-header">
+            <h1 class="test-title">🎤 Voice Features Test</h1>
+            <p>Test your browser's voice input and output capabilities</p>
+        </div>
+
+        <div class="test-section">
+            <h3>Browser Support Status</h3>
+            <div class="support-status">
+                <div class="status-item">
+                    <div class="status-indicator" id="recognition-status"></div>
+                    <span>Speech Recognition</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator" id="synthesis-status"></div>
+                    <span>Speech Synthesis</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator" id="webrtc-status"></div>
+                    <span>WebRTC Audio</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator" id="microphone-status"></div>
+                    <span>Microphone Access</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Speech-to-Text Test</h3>
+            <div class="test-controls">
+                <button class="test-button" id="start-recording">Start Recording</button>
+                <button class="test-button" id="stop-recording" disabled>Stop Recording</button>
+                <button class="test-button" id="clear-transcript">Clear</button>
+            </div>
+            <div class="test-output" id="transcript-output">Click "Start Recording" and speak into your microphone...</div>
+        </div>
+
+        <div class="test-section">
+            <h3>Text-to-Speech Test</h3>
+            <div class="tts-controls">
+                <input type="text" class="tts-input" id="tts-text" placeholder="Enter text to speak..." 
+                       value="Hello! This is a test of the text-to-speech functionality.">
+                <button class="test-button" id="speak-text">Speak</button>
+                <button class="test-button" id="stop-speaking">Stop</button>
+            </div>
+            <div class="test-output" id="tts-output">Enter text above and click "Speak" to test text-to-speech...</div>
+        </div>
+
+        <div class="test-section">
+            <h3>Voice Manager Integration Test</h3>
+            <div class="test-controls">
+                <button class="test-button" id="test-voice-manager">Test Voice Manager</button>
+                <button class="test-button" id="test-fallback">Test Fallback Mode</button>
+            </div>
+            <div class="test-output" id="integration-output">Click "Test Voice Manager" to run comprehensive tests...</div>
+        </div>
+    </div>
+
+    <script src="voice-manager.js"></script>
+    <script>
+        let voiceManager;
+        let isRecording = false;
+        let currentUtterance = null;
+
+        // Initialize voice manager
+        function initVoiceManager() {
+            voiceManager = new VoiceManager(
+                handleVoiceInput,
+                handleVoiceStateChange
+            );
+            updateSupportStatus();
+        }
+
+        function handleVoiceInput(transcript) {
+            const output = document.getElementById('transcript-output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] Transcript: ${transcript}\n`;
+        }
+
+        function handleVoiceStateChange(state, message) {
+            const output = document.getElementById('transcript-output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] State: ${state}${message ? ` - ${message}` : ''}\n`;
+            
+            const startBtn = document.getElementById('start-recording');
+            const stopBtn = document.getElementById('stop-recording');
+            
+            if (state === 'recording') {
+                startBtn.classList.add('recording');
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                isRecording = true;
+            } else {
+                startBtn.classList.remove('recording');
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                isRecording = false;
+            }
+        }
+
+        function updateSupportStatus() {
+            const support = voiceManager.getSupportedFeatures();
+            
+            document.getElementById('recognition-status').className = 
+                `status-indicator ${support.recognition ? 'supported' : ''}`;
+            document.getElementById('synthesis-status').className = 
+                `status-indicator ${support.synthesis ? 'supported' : ''}`;
+            document.getElementById('webrtc-status').className = 
+                `status-indicator ${support.webrtc ? 'supported' : ''}`;
+            
+            // Test microphone access
+            voiceManager.requestMicrophonePermission().then(hasAccess => {
+                document.getElementById('microphone-status').className = 
+                    `status-indicator ${hasAccess ? 'supported' : ''}`;
+            });
+        }
+
+        // Event listeners
+        document.getElementById('start-recording').addEventListener('click', async () => {
+            if (!isRecording) {
+                const started = await voiceManager.startRecording();
+                if (!started) {
+                    const output = document.getElementById('transcript-output');
+                    output.textContent += `[${new Date().toLocaleTimeString()}] Failed to start recording\n`;
+                }
+            }
+        });
+
+        document.getElementById('stop-recording').addEventListener('click', () => {
+            if (isRecording) {
+                voiceManager.stopRecording();
+            }
+        });
+
+        document.getElementById('clear-transcript').addEventListener('click', () => {
+            document.getElementById('transcript-output').textContent = 'Transcript cleared...\n';
+        });
+
+        document.getElementById('speak-text').addEventListener('click', async () => {
+            const text = document.getElementById('tts-text').value;
+            const output = document.getElementById('tts-output');
+            
+            if (!text.trim()) {
+                output.textContent = 'Please enter some text to speak.\n';
+                return;
+            }
+            
+            try {
+                output.textContent = `Speaking: "${text}"\n`;
+                await voiceManager.speak(text, { force: true });
+                output.textContent += 'Speech completed.\n';
+            } catch (error) {
+                output.textContent += `Speech error: ${error.message}\n`;
+            }
+        });
+
+        document.getElementById('stop-speaking').addEventListener('click', () => {
+            voiceManager.stopSpeaking();
+            document.getElementById('tts-output').textContent += 'Speech stopped.\n';
+        });
+
+        document.getElementById('test-voice-manager').addEventListener('click', async () => {
+            const output = document.getElementById('integration-output');
+            output.textContent = 'Running comprehensive voice tests...\n';
+            
+            try {
+                const results = await voiceManager.testVoiceFeatures();
+                output.textContent += `Test Results:\n`;
+                output.textContent += `- Speech Recognition: ${results.recognition ? 'PASS' : 'FAIL'}\n`;
+                output.textContent += `- Speech Synthesis: ${results.synthesis ? 'PASS' : 'FAIL'}\n`;
+                output.textContent += `- WebRTC: ${results.webrtc ? 'PASS' : 'FAIL'}\n`;
+                output.textContent += `- Microphone: ${results.microphone ? 'PASS' : 'FAIL'}\n`;
+                
+                const overallScore = Object.values(results).filter(Boolean).length;
+                output.textContent += `\nOverall Score: ${overallScore}/4 features supported\n`;
+                
+                if (overallScore === 4) {
+                    output.textContent += 'All voice features are fully supported! 🎉\n';
+                } else if (overallScore >= 2) {
+                    output.textContent += 'Partial voice support available. Some features may use fallbacks.\n';
+                } else {
+                    output.textContent += 'Limited voice support. Text-only mode recommended.\n';
+                }
+            } catch (error) {
+                output.textContent += `Test failed: ${error.message}\n`;
+            }
+        });
+
+        document.getElementById('test-fallback').addEventListener('click', () => {
+            const output = document.getElementById('integration-output');
+            output.textContent = 'Testing fallback mode...\n';
+            
+            // Simulate fallback mode
+            voiceManager.fallbackMode = true;
+            output.textContent += 'Fallback mode activated.\n';
+            output.textContent += 'Voice input will use basic speech recognition only.\n';
+            output.textContent += 'TTS will be disabled unless explicitly forced.\n';
+            
+            setTimeout(() => {
+                voiceManager.fallbackMode = false;
+                output.textContent += 'Fallback mode deactivated. Normal operation restored.\n';
+            }, 3000);
+        });
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initVoiceManager);
+    </script>
+</body>
+</html>

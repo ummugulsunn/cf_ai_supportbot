@@ -1,0 +1,116 @@
+{
+  "monitoring": {
+    "dashboards": {
+      "production": {
+        "name": "CF AI Support Bot - Production",
+        "description": "Production monitoring dashboard for Cloudflare AI Support Bot",
+        "widgets": [
+          {
+            "type": "metric",
+            "title": "Request Rate",
+            "query": "sum(rate(cloudflare_worker_requests_total[5m]))",
+            "thresholds": {
+              "warning": 1000,
+              "critical": 5000
+            }
+          },
+          {
+            "type": "metric",
+            "title": "Error Rate",
+            "query": "sum(rate(cloudflare_worker_errors_total[5m])) / sum(rate(cloudflare_worker_requests_total[5m])) * 100",
+            "thresholds": {
+              "warning": 1,
+              "critical": 5
+            }
+          },
+          {
+            "type": "metric",
+            "title": "P95 Latency",
+            "query": "histogram_quantile(0.95, cloudflare_worker_duration_seconds)",
+            "thresholds": {
+              "warning": 1.0,
+              "critical": 2.0
+            }
+          },
+          {
+            "type": "metric",
+            "title": "Memory Usage",
+            "query": "cloudflare_worker_memory_usage_bytes",
+            "thresholds": {
+              "warning": 100000000,
+              "critical": 128000000
+            }
+          }
+        ]
+      }
+    },
+    "alerts": {
+      "high_error_rate": {
+        "name": "High Error Rate",
+        "description": "Error rate exceeds 5% for 5 minutes",
+        "condition": "sum(rate(cloudflare_worker_errors_total[5m])) / sum(rate(cloudflare_worker_requests_total[5m])) * 100 > 5",
+        "duration": "5m",
+        "severity": "critical",
+        "notifications": ["email", "slack"]
+      },
+      "high_latency": {
+        "name": "High Latency",
+        "description": "P95 latency exceeds 2 seconds for 5 minutes",
+        "condition": "histogram_quantile(0.95, cloudflare_worker_duration_seconds) > 2",
+        "duration": "5m",
+        "severity": "warning",
+        "notifications": ["email"]
+      },
+      "memory_usage": {
+        "name": "High Memory Usage",
+        "description": "Memory usage exceeds 80% of limit",
+        "condition": "cloudflare_worker_memory_usage_bytes > 100000000",
+        "duration": "10m",
+        "severity": "warning",
+        "notifications": ["email"]
+      },
+      "ai_model_failures": {
+        "name": "AI Model Failures",
+        "description": "AI model failure rate exceeds 10%",
+        "condition": "sum(rate(ai_model_failures_total[5m])) / sum(rate(ai_requests_total[5m])) * 100 > 10",
+        "duration": "5m",
+        "severity": "critical",
+        "notifications": ["email", "slack"]
+      }
+    },
+    "healthchecks": {
+      "endpoints": [
+        {
+          "name": "Worker Health",
+          "url": "https://cf-ai-supportbot.your-subdomain.workers.dev/health",
+          "method": "GET",
+          "expected_status": 200,
+          "timeout": 10,
+          "interval": 60
+        },
+        {
+          "name": "API Status",
+          "url": "https://cf-ai-supportbot.your-subdomain.workers.dev/api/status",
+          "method": "GET",
+          "expected_status": 200,
+          "timeout": 10,
+          "interval": 60
+        },
+        {
+          "name": "Pages Frontend",
+          "url": "https://cf-ai-supportbot-frontend.pages.dev",
+          "method": "GET",
+          "expected_status": 200,
+          "timeout": 10,
+          "interval": 300
+        }
+      ]
+    },
+    "sla": {
+      "availability": 99.9,
+      "error_rate": 1.0,
+      "p95_latency": 2000,
+      "p99_latency": 5000
+    }
+  }
+}

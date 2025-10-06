@@ -1,0 +1,101 @@
+{
+  "environments": {
+    "development": {
+      "worker": {
+        "name": "cf-ai-supportbot-dev",
+        "env": "development"
+      },
+      "pages": {
+        "project": "cf-ai-supportbot-frontend-dev"
+      },
+      "variables": {
+        "ENVIRONMENT": "development",
+        "MAX_TOKENS": "2048",
+        "RATE_LIMIT_PER_MINUTE": "30",
+        "SESSION_TTL_HOURS": "2",
+        "LOG_LEVEL": "debug"
+      },
+      "kv": {
+        "namespace": "cf-ai-supportbot-dev-kv",
+        "preview_namespace": "cf-ai-supportbot-dev-kv-preview"
+      },
+      "r2": {
+        "bucket": "cf-ai-supportbot-dev-archives",
+        "preview_bucket": "cf-ai-supportbot-dev-archives-preview"
+      }
+    },
+    "staging": {
+      "worker": {
+        "name": "cf-ai-supportbot-staging",
+        "env": "staging"
+      },
+      "pages": {
+        "project": "cf-ai-supportbot-frontend-staging"
+      },
+      "variables": {
+        "ENVIRONMENT": "staging",
+        "MAX_TOKENS": "4096",
+        "RATE_LIMIT_PER_MINUTE": "60",
+        "SESSION_TTL_HOURS": "12",
+        "LOG_LEVEL": "info"
+      },
+      "kv": {
+        "namespace": "cf-ai-supportbot-staging-kv",
+        "preview_namespace": "cf-ai-supportbot-staging-kv-preview"
+      },
+      "r2": {
+        "bucket": "cf-ai-supportbot-staging-archives",
+        "preview_bucket": "cf-ai-supportbot-staging-archives-preview"
+      }
+    },
+    "production": {
+      "worker": {
+        "name": "cf-ai-supportbot",
+        "env": "production"
+      },
+      "pages": {
+        "project": "cf-ai-supportbot-frontend"
+      },
+      "variables": {
+        "ENVIRONMENT": "production",
+        "MAX_TOKENS": "4096",
+        "RATE_LIMIT_PER_MINUTE": "100",
+        "SESSION_TTL_HOURS": "24",
+        "LOG_LEVEL": "warn"
+      },
+      "kv": {
+        "namespace": "cf-ai-supportbot-prod-kv",
+        "preview_namespace": "cf-ai-supportbot-prod-kv-preview"
+      },
+      "r2": {
+        "bucket": "cf-ai-supportbot-prod-archives",
+        "preview_bucket": "cf-ai-supportbot-prod-archives-preview"
+      }
+    }
+  },
+  "secrets": [
+    "OPENAI_API_KEY",
+    "KNOWLEDGE_BASE_API_KEY",
+    "TICKETING_API_KEY"
+  ],
+  "healthChecks": {
+    "endpoints": [
+      "/health",
+      "/api/status"
+    ],
+    "timeout": 10000,
+    "retries": 3
+  },
+  "monitoring": {
+    "alerts": {
+      "errorRate": {
+        "threshold": 5,
+        "window": "5m"
+      },
+      "latency": {
+        "p95Threshold": 2000,
+        "window": "5m"
+      }
+    }
+  }
+}
