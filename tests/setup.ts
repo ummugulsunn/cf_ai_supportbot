@@ -1,5 +1,11 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
+import { webcrypto } from 'node:crypto';
+
+// Polyfill crypto for Node.js environment
+if (typeof globalThis.crypto === 'undefined') {
+  globalThis.crypto = webcrypto as Crypto;
+}
 
 // Global test setup for frontend tests
 global.WebSocket = class MockWebSocket {

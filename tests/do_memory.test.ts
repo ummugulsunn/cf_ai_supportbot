@@ -277,9 +277,44 @@ describe('SessionMemoryDO', () => {
     });
 
     it('should generate summary of conversation', async () => {
-      // Verify the memory has messages first
-      const memory = mockState.getStorageData('memory') as ConversationMemory;
-      expect(memory.messages).toHaveLength(3);
+      // Ensure sessionId is set correctly
+      (memoryDO as any).sessionId = 'test-session';
+      
+      // Set up memory with messages for this specific test
+      const testMessages: ChatMessage[] = [
+        {
+          id: 'msg-1',
+          sessionId: 'test-session',
+          content: 'I need help with password reset',
+          role: 'user',
+          timestamp: Date.now()
+        },
+        {
+          id: 'msg-2',
+          sessionId: 'test-session',
+          content: 'I can help you with that',
+          role: 'assistant',
+          timestamp: Date.now() + 1000
+        },
+        {
+          id: 'msg-3',
+          sessionId: 'test-session',
+          content: 'I also have a billing question',
+          role: 'user',
+          timestamp: Date.now() + 2000
+        }
+      ];
+      
+      const memory: ConversationMemory = {
+        sessionId: 'test-session',
+        messages: testMessages,
+        summary: '',
+        context: {},
+        lastSummaryAt: Date.now() - 20 * 60 * 1000, // 20 minutes ago to trigger summary
+        ttl: 24 * 60 * 60 * 1000
+      };
+      
+      await mockState.storage.put('memory', memory);
       
       const request = new Request('http://localhost/session/test-session', {
         method: 'POST',
@@ -329,8 +364,9 @@ describe('SessionMemoryDO', () => {
         ttl: 24 * 60 * 60 * 1000
       };
       
-      mockState.setStorageData('session', session);
-      mockState.setStorageData('memory', memory);
+      // Set up the storage data properly
+      await mockState.storage.put('session', session);
+      await mockState.storage.put('memory', memory);
 
       // Add one more message to trigger trimming
       const newMessage: ChatMessage = {
@@ -353,7 +389,7 @@ describe('SessionMemoryDO', () => {
       const response = await memoryDO.fetch(request);
       expect(response.status).toBe(200);
 
-      const updatedMemory = mockState.getStorageData('memory') as ConversationMemory;
+      const updatedMemory = await mockState.storage.get('memory') as ConversationMemory;
       expect(updatedMemory.messages).toHaveLength(100); // Should be trimmed to MAX_MESSAGES
       expect(updatedMemory.messages[99]?.id).toBe('msg-new'); // New message should be last
     });
