@@ -188,6 +188,7 @@ export class WorkflowEngine {
   ): Promise<WorkflowResult> {
     const startTime = Date.now();
     let totalRetries = 0;
+    let stepsCompleted = 0;
 
     for (let i = 0; i < execution.steps.length; i++) {
       execution.currentStepIndex = i;
@@ -195,11 +196,13 @@ export class WorkflowEngine {
       const handler = this.stepHandlers.get(step.name);
 
       if (!handler) {
+        const duration = Date.now() - startTime;
         throw new Error(`No handler registered for step: ${step.name}`);
       }
 
       // Validate input if handler supports it
       if (handler.validate && !handler.validate(step.input)) {
+        const duration = Date.now() - startTime;
         throw new Error(`Invalid input for step ${step.name}`);
       }
 
@@ -219,6 +222,7 @@ export class WorkflowEngine {
         step.status = 'completed';
         step.completedAt = Date.now();
         totalRetries += step.retryCount;
+        stepsCompleted++;
 
         // Update context variables with step output
         if (result && typeof result === 'object') {
@@ -232,17 +236,29 @@ export class WorkflowEngine {
         step.error = error instanceof Error ? error.message : String(error);
         step.completedAt = Date.now();
         totalRetries += step.retryCount;
-        throw error;
+        
+        // Calculate duration before throwing
+        const duration = Date.now() - startTime;
+        
+        // Re-throw with duration metadata preserved
+        const enhancedError = error instanceof Error ? error : new Error(String(error));
+        (enhancedError as any).workflowMetadata = {
+          duration,
+          stepsCompleted,
+          retriesUsed: totalRetries
+        };
+        throw enhancedError;
       }
     }
 
+    const duration = Date.now() - startTime;
     return {
       success: true,
       executionId: execution.id,
       result: execution.steps[execution.steps.length - 1]?.output,
       metadata: {
-        duration: Date.now() - startTime,
-        stepsCompleted: execution.steps.length,
+        duration,
+        stepsCompleted,
         retriesUsed: totalRetries,
       },
     };
@@ -370,10 +386,10 @@ export class WorkflowEngine {
     // Poll for completion with timeout
     const maxWaitTime = 30000; // 30 seconds
     const pollInterval = 100; // 100ms
-    const startTime = Date.now();
+    const waitStartTime = Date.now();
 
     while (execution.status === 'running' || execution.status === 'pending') {
-      if (Date.now() - startTime > maxWaitTime) {
+      if (Date.now() - waitStartTime > maxWaitTime) {
         throw new Error('Timeout waiting for existing workflow execution');
       }
       await this.sleep(pollInterval);

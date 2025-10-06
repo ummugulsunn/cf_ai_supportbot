@@ -324,10 +324,14 @@ export class RateLimitMonitor {
   }
 
   recordRateLimitHit(sessionId: string, limitType: string, remaining: number): void {
+    // Record with labels for detailed tracking
     this.metrics.incrementCounter('rate_limit_hits_total', 1, {
       type: limitType,
       sessionId
     });
+    
+    // Also update the base counter for aggregate metrics
+    this.metrics.incrementCounter('rate_limit_hits_total', 1);
 
     this.metrics.setGauge('rate_limit_remaining', remaining, {
       type: limitType,
@@ -365,7 +369,12 @@ export class MemoryMonitor {
   }
 
   recordMemoryUsage(component: string, bytes: number): void {
+    // Record with component label for detailed tracking
     this.metrics.setGauge('memory_usage_bytes', bytes, { component });
+    
+    // Also update the base gauge for aggregate metrics
+    const currentTotal = this.metrics.getMetrics().memoryUsage.value || 0;
+    this.metrics.setGauge('memory_usage_bytes', Math.max(currentTotal, bytes));
     
     // Log warning if memory usage is high
     const mbUsage = bytes / (1024 * 1024);

@@ -377,16 +377,37 @@ export function createToolChainWorkflow(input: ToolChainInput): WorkflowDefiniti
   // Replace dynamic steps with actual tool calls
   workflow.steps = workflow.steps.filter(step => step.name !== 'execute_tool');
   
-  input.toolCalls?.forEach((toolCall: any, index: any) => {
-    workflow.steps.splice(1 + index, 0, {
-      id: `tool_${index}`,
-      name: 'execute_tool',
-      input: { toolCall },
-      retryCount: 0,
-      maxRetries: 2,
-      status: 'pending'
+  // Handle both toolCalls and tools array
+  if (input.toolCalls && input.toolCalls.length > 0) {
+    input.toolCalls.forEach((toolCall: any, index: any) => {
+      workflow.steps.splice(1 + index, 0, {
+        id: `tool_${index}`,
+        name: 'execute_tool',
+        input: { toolCall },
+        retryCount: 0,
+        maxRetries: 2,
+        status: 'pending'
+      });
     });
-  });
+  } else if (input.tools && input.tools.length > 0) {
+    // Convert tools array to toolCalls
+    input.tools.forEach((toolName: string, index: number) => {
+      workflow.steps.splice(1 + index, 0, {
+        id: `tool_${toolName}`,
+        name: 'execute_tool',
+        input: {
+          toolCall: {
+            id: `tool_${index}`,
+            name: toolName,
+            parameters: {}
+          }
+        },
+        retryCount: 0,
+        maxRetries: 2,
+        status: 'pending'
+      });
+    });
+  }
   
   return workflow;
 }

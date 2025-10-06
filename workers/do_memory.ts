@@ -174,11 +174,16 @@ export class SessionMemoryDO implements DurableObject, MemoryOperations {
 
   async getContext(): Promise<ConversationContext> {
     const memory = await this.getMemory();
-    const session = await this.getSessionState();
+    
+    // Generate summary if empty and we have messages
+    let summary = memory.summary;
+    if (!summary && memory.messages.length > 0) {
+      summary = await this.generateSummary();
+    }
     
     return {
       sessionId: this.sessionId,
-      summary: memory.summary,
+      summary: summary,
       recentMessages: memory.messages.slice(-10), // Last 10 messages
       activeTopics: this.extractTopics(memory.messages),
       resolvedIssues: memory.context.resolvedIssues || []
@@ -192,12 +197,11 @@ export class SessionMemoryDO implements DurableObject, MemoryOperations {
       return 'No conversation history available.';
     }
 
-    // Simple summarization logic - in production, this would use AI
-    const recentMessages = memory.messages.slice(-10);
-    const userMessages = recentMessages.filter(m => m.role === 'user');
-    const assistantMessages = recentMessages.filter(m => m.role === 'assistant');
+    // Use all messages for summary, not just recent ones
+    const userMessages = memory.messages.filter(m => m.role === 'user');
+    const assistantMessages = memory.messages.filter(m => m.role === 'assistant');
     
-    const topics = this.extractTopics(recentMessages);
+    const topics = this.extractTopics(memory.messages);
     
     const summary = `Conversation summary: ${userMessages.length} user messages, ${assistantMessages.length} assistant responses. ` +
                    `Active topics: ${topics.join(', ')}. ` +
@@ -376,13 +380,18 @@ export class SessionMemoryDO implements DurableObject, MemoryOperations {
       throw new Error('No messages to archive');
     }
     
-    const archiveKey = await this.persistenceService.archiveConversation(memory, session);
-    
-    // Mark session as archived
-    session.status = 'ended';
-    await this.state.storage.put('session', session);
-    
-    return archiveKey;
+    try {
+      const archiveKey = await this.persistenceService.archiveConversation(memory, session);
+      
+      // Mark session as archived
+      session.status = 'ended';
+      await this.state.storage.put('session', session);
+      
+      return archiveKey;
+    } catch (error) {
+      // If archival fails, throw a proper error
+      throw new Error(`Failed to archive session: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   async restoreSession(sessionId: string): Promise<boolean> {

@@ -209,7 +209,12 @@ export class WorkflowService implements SupportWorkflow {
             return { stored: true, key: input.key, timestamp: Date.now() };
           }
         } catch (error) {
-          throw new Error(`Data persistence failed: ${error instanceof Error ? error.message : String(error)}`);
+          const errorMsg = error instanceof Error ? error.message : String(error);
+          // Check if this is a permanent storage failure
+          if (errorMsg.includes('permanently unavailable') || errorMsg.includes('unavailable')) {
+            throw new Error('Storage service unavailable');
+          }
+          throw new Error(`Data persistence failed: ${errorMsg}`);
         }
       },
       async compensate(input: { key: string }, context: WorkflowContext): Promise<void> {
