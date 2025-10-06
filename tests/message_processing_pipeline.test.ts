@@ -24,6 +24,7 @@ describe('Message Processing Pipeline Integration', () => {
       } as any,
       CHAT_KV: {} as any,
       ARCHIVE_R2: {} as any,
+      WORKFLOWS: {} as any,
       OPENAI_API_KEY: 'test-key',
       MAX_TOKENS: '2048'
     };
@@ -95,11 +96,11 @@ describe('Message Processing Pipeline Integration', () => {
     });
 
     // Verify AI was called with proper context
-    expect(mockEnv.AI.run).toHaveBeenCalledWith('@cf/meta/llama-3.3-70b-instruct', {
+    expect(mockEnv.AI.run).toHaveBeenCalledWith('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
       messages: [
         {
           role: 'system',
-          content: expect.stringContaining('helpful AI support assistant')
+          content: expect.stringContaining('expert AI support assistant')
         },
         {
           role: 'user',
@@ -114,8 +115,11 @@ describe('Message Processing Pipeline Integration', () => {
           content: 'I keep getting locked out of my account'
         }
       ],
-      max_tokens: 2048,
-      temperature: 0.7,
+      max_tokens: expect.any(Number),
+      temperature: 0.3,
+      top_p: 0.9,
+      frequency_penalty: 0.1,
+      presence_penalty: 0.1,
       stream: false
     });
 

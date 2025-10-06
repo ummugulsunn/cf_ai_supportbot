@@ -232,14 +232,18 @@ describe('Voice Manager Functionality', () => {
             }))
         } as any;
 
-        global.navigator = {
-            ...global.navigator,
-            mediaDevices: {
-                getUserMedia: vi.fn().mockResolvedValue({
-                    getTracks: () => [{ stop: vi.fn() }]
-                })
-            }
-        } as any;
+        Object.defineProperty(global, 'navigator', {
+            value: {
+                ...global.navigator,
+                mediaDevices: {
+                    getUserMedia: vi.fn().mockResolvedValue({
+                        getTracks: () => [{ stop: vi.fn() }]
+                    })
+                }
+            },
+            writable: true,
+            configurable: true
+        });
     });
 
     afterEach(() => {

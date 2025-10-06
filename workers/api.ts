@@ -35,11 +35,11 @@ interface ProcessingResult {
 export default {
   async fetch(request: Request, env: WorkerBindings, ctx: ExecutionContext): Promise<Response> {
     const middleware = new MonitoringMiddleware(env);
-    
+
     return await middleware.wrapRequest(request, async (req, context) => {
       const { logger, metrics, requestId } = context;
       const url = new URL(req.url);
-      
+
       // Add CORS headers for all responses
       const corsHeaders = {
         'Access-Control-Allow-Origin': '*',
@@ -63,7 +63,7 @@ export default {
         } else if (url.pathname === '/api/health') {
           const { health } = createMonitoringSystem(env, requestId);
           const healthStatus = await health.checkHealth();
-          
+
           return new Response(JSON.stringify({
             ...healthStatus,
             requestId
@@ -72,14 +72,14 @@ export default {
           });
         } else if (url.pathname === '/api/metrics') {
           const exportedMetrics = await metrics.exportMetrics();
-          
+
           return new Response(exportedMetrics, {
             headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
           });
         } else if (url.pathname === '/api/alerts') {
           const { alerts } = createMonitoringSystem(env, requestId);
           const activeAlerts = alerts.getActiveAlerts();
-          
+
           return new Response(JSON.stringify({
             alerts: activeAlerts,
             requestId,
@@ -89,9 +89,9 @@ export default {
           });
         } else {
           metrics.incrementCounter('requests_not_found', 1, { path: url.pathname });
-          return new Response('Not Found', { 
-            status: 404, 
-            headers: corsHeaders 
+          return new Response('Not Found', {
+            status: 404,
+            headers: corsHeaders
           });
         }
       } catch (error) {
@@ -109,8 +109,8 @@ export default {
 };
 
 async function handleChatRequest(
-  request: Request, 
-  env: WorkerBindings, 
+  request: Request,
+  env: WorkerBindings,
   requestId: string,
   corsHeaders: Record<string, string>,
   logger: Logger,
@@ -118,9 +118,9 @@ async function handleChatRequest(
   middleware: MonitoringMiddleware
 ): Promise<Response> {
   if (request.method !== 'POST') {
-    return new Response('Method not allowed', { 
-      status: 405, 
-      headers: corsHeaders 
+    return new Response('Method not allowed', {
+      status: 405,
+      headers: corsHeaders
     });
   }
 
@@ -144,11 +144,11 @@ async function handleChatRequest(
 
     // Generate or use existing session ID
     const sessionId = body.sessionId || generateSessionId();
-    
+
     // Initialize security manager
     const securityManager = new SecurityManager(env);
     const securityContext = extractSecurityContext(request, requestId, sessionId);
-    
+
     // Perform comprehensive security check with monitoring
     const securityCheck = await middleware.monitorSecurityCheck(
       'comprehensive_check',
@@ -157,7 +157,7 @@ async function handleChatRequest(
       metrics,
       () => securityManager.performSecurityCheck(body.message, sessionId, securityContext)
     );
-    
+
     // Block request if security check fails
     if (!securityCheck.allowed) {
       return createErrorResponse(
@@ -174,10 +174,10 @@ async function handleChatRequest(
         }
       );
     }
-    
+
     // Use filtered content instead of original message
     const filteredMessage = securityCheck.filteredContent;
-    
+
     // Create user message with filtered content
     const userMessage: ChatMessage = {
       id: generateMessageId(),
@@ -300,8 +300,8 @@ async function handleChatRequest(
         rateLimitReset: securityCheck.rateLimitResult.resetTime
       }
     }), {
-      headers: { 
-        ...corsHeaders, 
+      headers: {
+        ...corsHeaders,
         'Content-Type': 'application/json',
         'X-RateLimit-Remaining': securityCheck.rateLimitResult.remaining.toString(),
         'X-RateLimit-Reset': securityCheck.rateLimitResult.resetTime.toString()
@@ -355,7 +355,7 @@ async function processMessageWithAI(
       metrics,
       () => callLlamaModel(messages, env, requestId)
     );
-    
+
     if (primaryResult.success) {
       return {
         response: primaryResult.response,
@@ -376,7 +376,7 @@ async function processMessageWithAI(
       metrics,
       () => callOpenAIFallback(messages, env, requestId)
     );
-    
+
     if (fallbackResult.success) {
       return {
         response: fallbackResult.response,
@@ -401,10 +401,10 @@ async function processMessageWithAI(
 }
 
 async function callLlamaModel(
-  messages: Array<{role: string, content: string}>,
+  messages: Array<{ role: string, content: string }>,
   env: WorkerBindings,
   requestId: string
-): Promise<{success: boolean, response: AIResponse}> {
+): Promise<{ success: boolean, response: AIResponse }> {
   try {
     // Optimize model parameters for support bot use case
     const optimizedParams = {
@@ -426,10 +426,10 @@ async function callLlamaModel(
 
     // Handle different response formats
     const content = response.response || response.content || (typeof response === 'string' ? response : '');
-    
+
     // Post-process response for better quality
     const processedContent = postProcessAIResponse(content);
-    
+
     return {
       success: true,
       response: {
@@ -455,10 +455,10 @@ async function callLlamaModel(
 }
 
 async function callOpenAIFallback(
-  messages: Array<{role: string, content: string}>,
+  messages: Array<{ role: string, content: string }>,
   env: WorkerBindings,
   requestId: string
-): Promise<{success: boolean, response: AIResponse}> {
+): Promise<{ success: boolean, response: AIResponse }> {
   try {
     // Check if OpenAI API key is available
     if (!env.OPENAI_API_KEY) {
@@ -484,7 +484,7 @@ async function callOpenAIFallback(
     }
 
     const data = await response.json() as any;
-    
+
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
       throw new Error('Invalid response from OpenAI API');
     }
@@ -601,9 +601,9 @@ async function handleSessionRequest(
           return await response.json();
         }
       );
-      
+
       return new Response(JSON.stringify({
-        ...sessionData,
+        ...(sessionData as object),
         requestId,
         timestamp: Date.now()
       }), {
@@ -620,7 +620,7 @@ async function handleSessionRequest(
           method: 'DELETE'
         })
       );
-      
+
       return new Response(JSON.stringify({
         success: true,
         requestId,
@@ -629,9 +629,9 @@ async function handleSessionRequest(
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     } else {
-      return new Response('Method not allowed', { 
-        status: 405, 
-        headers: corsHeaders 
+      return new Response('Method not allowed', {
+        status: 405,
+        headers: corsHeaders
       });
     }
   } catch (error) {
@@ -648,7 +648,7 @@ async function handleSessionRequest(
 }
 
 // AI optimization helper functions
-function optimizeMessagesForModel(messages: Array<{role: string, content: string}>): Array<{role: string, content: string}> {
+function optimizeMessagesForModel(messages: Array<{ role: string, content: string }>): Array<{ role: string, content: string }> {
   // Optimize message history for better model performance
   const optimized = messages.map(msg => ({
     ...msg,
@@ -667,32 +667,32 @@ function optimizeMessagesForModel(messages: Array<{role: string, content: string
   return optimized;
 }
 
-function calculateOptimalTokenLimit(messages: Array<{role: string, content: string}>, env: WorkerBindings): number {
+function calculateOptimalTokenLimit(messages: Array<{ role: string, content: string }>, env: WorkerBindings): number {
   // Calculate optimal token limit based on input length
   const totalInputLength = messages.reduce((sum, msg) => sum + msg.content.length, 0);
   const estimatedInputTokens = Math.ceil(totalInputLength / 4); // Rough estimation: 4 chars per token
-  
+
   const maxTokens = parseInt(env.MAX_TOKENS || '4096');
   const contextWindow = 8192; // Llama 3.3 context window
-  
+
   // Reserve space for input tokens and some buffer
   const availableTokens = contextWindow - estimatedInputTokens - 100;
-  
+
   return Math.min(maxTokens, Math.max(512, availableTokens));
 }
 
 function postProcessAIResponse(content: string): string {
   // Clean up and optimize AI response
   let processed = content.trim();
-  
+
   // Remove any potential prompt injection artifacts
   processed = processed.replace(/^(Assistant:|AI:|Bot:)\s*/i, '');
-  
+
   // Ensure proper sentence endings
   if (processed && !processed.match(/[.!?]$/)) {
     processed += '.';
   }
-  
+
   // Limit response length for better UX
   if (processed.length > 1000) {
     const sentences = processed.split(/[.!?]+/);
@@ -703,7 +703,7 @@ function postProcessAIResponse(content: string): string {
     }
     processed = truncated || processed.slice(0, 800) + '...';
   }
-  
+
   return processed;
 }
 
@@ -728,8 +728,8 @@ function createErrorResponse(
     timestamp: Date.now()
   };
 
-  const headers = { ...corsHeaders, 'Content-Type': 'application/json' };
-  
+  const headers: Record<string, string> = { ...corsHeaders, 'Content-Type': 'application/json' };
+
   // Add rate limit headers if available
   if (details?.rateLimitReset) {
     headers['X-RateLimit-Reset'] = details.rateLimitReset.toString();

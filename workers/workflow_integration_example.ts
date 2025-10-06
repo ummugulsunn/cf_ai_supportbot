@@ -148,7 +148,7 @@ async function handleSimpleQuery(
   bindings: WorkerBindings
 ): Promise<{ response: string; workflowExecuted: boolean }> {
   try {
-    const aiResponse = await bindings.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8', {
+    const aiResponse = await bindings.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
       messages: [
         {
           role: 'system',

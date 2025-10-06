@@ -595,7 +595,7 @@ export class HealthMonitor {
     
     try {
       // Simple health check - try to get model info or make a minimal request
-      const response = await this.bindings.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+      const response = await this.bindings.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
         messages: [{ role: 'user', content: 'ping' }],
         max_tokens: 1
       });

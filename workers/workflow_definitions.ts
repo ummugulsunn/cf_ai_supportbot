@@ -2,11 +2,28 @@
 import { 
   WorkflowDefinition, 
   WorkflowStep, 
-  DEFAULT_RETRY_CONFIG,
-  SupportWorkflowInput,
-  ToolChainInput,
-  EscalationInput 
+  DEFAULT_RETRY_CONFIG
 } from './workflow';
+
+// Export input types for use in other modules
+export interface SupportWorkflowInput {
+  query: string;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  context?: any;
+}
+
+export interface ToolChainInput {
+  tools: string[];
+  query: string;
+  context?: any;
+}
+
+export interface EscalationInput {
+  issue: string;
+  priority: 'high' | 'urgent';
+  ticketData: any;
+  context?: any;
+}
 
 // Complex query processing workflow
 export const COMPLEX_QUERY_WORKFLOW: WorkflowDefinition = {

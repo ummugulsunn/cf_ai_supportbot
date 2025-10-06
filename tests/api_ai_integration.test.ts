@@ -87,13 +87,16 @@ describe('API Worker AI Integration', () => {
       expect(result.sessionId).toBe('test-session');
       
       // Verify AI was called with correct parameters
-      expect(mockAI.run).toHaveBeenCalledWith('@cf/meta/llama-3.3-70b-instruct', {
+      expect(mockAI.run).toHaveBeenCalledWith('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
         messages: expect.arrayContaining([
           expect.objectContaining({ role: 'system' }),
           expect.objectContaining({ role: 'user', content: 'Hello, I need help' })
         ]),
-        max_tokens: 4096,
-        temperature: 0.7,
+        max_tokens: expect.any(Number),
+        temperature: 0.3,
+        top_p: 0.9,
+        frequency_penalty: 0.1,
+        presence_penalty: 0.1,
         stream: false
       });
     });

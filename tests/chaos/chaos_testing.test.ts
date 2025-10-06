@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { SessionMemoryDO } from '../workers/do_memory';
-import { WorkerBindings } from '../workers/types';
+import { SessionMemoryDO } from '../../workers/do_memory';
+import { WorkerBindings } from '../../workers/types';
 
 // Chaos Testing Suite for CF AI Support Bot
 // Tests system resilience under various failure conditions

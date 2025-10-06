@@ -105,7 +105,7 @@ export class DataPersistenceService {
       return archiveKey;
     } catch (error) {
       console.error('Failed to archive conversation:', error);
-      throw new Error(`Archive operation failed: ${error.message}`);
+      throw new Error(`Archive operation failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -182,7 +182,7 @@ export class DataPersistenceService {
       );
     } catch (error) {
       console.error('Failed to cache embedding:', error);
-      throw new Error(`Cache operation failed: ${error.message}`);
+      throw new Error(`Cache operation failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -233,7 +233,7 @@ export class DataPersistenceService {
       );
     } catch (error) {
       console.error('Failed to cache query result:', error);
-      throw new Error(`Cache operation failed: ${error.message}`);
+      throw new Error(`Cache operation failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -315,7 +315,7 @@ export class DataPersistenceService {
       return backupId;
     } catch (error) {
       console.error('Failed to create backup:', error);
-      throw new Error(`Backup operation failed: ${error.message}`);
+      throw new Error(`Backup operation failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -360,7 +360,7 @@ export class DataPersistenceService {
       return restoredSessions;
     } catch (error) {
       console.error('Failed to restore from backup:', error);
-      throw new Error(`Restore operation failed: ${error.message}`);
+      throw new Error(`Restore operation failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -487,11 +487,11 @@ export class DataPersistenceService {
 
   private extractSessionIdFromArchiveKey(key: string): string | null {
     const match = key.match(/archive_([^_]+)_\d+\.json$/);
-    return match ? match[1] : null;
+    return match?.[1] ?? null;
   }
 
   private extractBackupIdFromKey(key: string): string | null {
     const match = key.match(/backups\/([^\/]+)\//);
-    return match ? match[1] : null;
+    return match?.[1] ?? null;
   }
 }

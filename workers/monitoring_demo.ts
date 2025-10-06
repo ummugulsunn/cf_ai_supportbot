@@ -99,7 +99,7 @@ export async function demonstrateMonitoring(): Promise<void> {
     async () => {
       // Simulate AI processing time
       await new Promise(resolve => setTimeout(resolve, 100));
-      return await bindings.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+      return await bindings.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
         messages: [{ role: 'user', content: 'Hello demo!' }]
       });
     },
