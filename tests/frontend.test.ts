@@ -307,8 +307,8 @@ describe('Voice Manager Functionality', () => {
         let finalTranscript = '';
 
         for (let i = mockEvent.resultIndex; i < mockEvent.results.length; i++) {
-            const transcript = mockEvent.results[i][0].transcript;
-            if (mockEvent.results[i].isFinal) {
+            const transcript = mockEvent.results[i]?.[0]?.transcript;
+            if (mockEvent.results[i]?.isFinal) {
                 finalTranscript += transcript;
             } else {
                 interimTranscript += transcript;
@@ -413,7 +413,7 @@ describe('Voice Manager Functionality', () => {
         );
 
         expect(qualityVoices.length).toBe(4);
-        expect(qualityVoices[0].name).toBe('Enhanced Voice');
+        expect(qualityVoices[0]?.name).toBe('Enhanced Voice');
 
         // Test fallback to English voices
         const englishVoices = mockVoices.filter(voice => voice.lang.startsWith('en'));
@@ -458,7 +458,7 @@ describe('Voice Manager Functionality', () => {
 
         try {
             await navigator.mediaDevices.getUserMedia({ audio: true });
-        } catch (error) {
+        } catch (error: any) {
             expect(error.message).toBe('Permission denied');
         }
     });
@@ -783,10 +783,11 @@ describe('Frontend Integration', () => {
             sessionId: 'sess_456',
             content: 'Hello world',
             role: 'assistant' as const,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            metadata: {}
         };
 
         expect(messageWithVoice.metadata?.voiceEnabled).toBe(true);
-        expect(messageWithoutVoice.metadata?.voiceEnabled).toBeUndefined();
+        expect((messageWithoutVoice.metadata as any)?.voiceEnabled).toBeUndefined();
     });
 });

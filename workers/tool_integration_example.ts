@@ -140,7 +140,7 @@ function extractSearchQuery(message: string): string | null {
   // Simple extraction - in a real implementation, this would be more sophisticated
   const searchMatch = message.match(/search\s+(?:for\s+)?(.+)/i);
   if (searchMatch) {
-    return searchMatch[1].trim();
+    return searchMatch[1]?.trim() || null;
   }
   
   // Look for question words that might indicate a search
@@ -167,7 +167,7 @@ function extractIssueData(message: string): any | null {
   }
   
   return {
-    title: title.trim(),
+    title: title?.trim(),
     description: message,
     priority,
     category: 'general'

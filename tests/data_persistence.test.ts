@@ -166,8 +166,8 @@ describe('DataPersistenceService', () => {
       const archives = await service.listArchivedConversations();
 
       expect(archives).toHaveLength(2);
-      expect(archives[0].sessionId).toBeDefined();
-      expect(archives[0].messageCount).toBeGreaterThan(0);
+      expect(archives[0]?.sessionId).toBeDefined();
+      expect(archives[0]?.messageCount).toBeGreaterThan(0);
     });
   });
 
@@ -269,8 +269,8 @@ describe('DataPersistenceService', () => {
       const sessionIds = [generateSessionId()];
       
       // Archive a conversation first
-      const memory = createTestMemory(sessionIds[0]);
-      const session = createTestSession(sessionIds[0]);
+      const memory = createTestMemory(sessionIds[0]!);
+      const session = createTestSession(sessionIds[0]!);
       await service.archiveConversation(memory, session);
 
       // Create backup
@@ -362,7 +362,7 @@ describe('DataPersistenceService', () => {
         ARCHIVE_R2: {
           ...mockBindings.ARCHIVE_R2,
           put: vi.fn().mockRejectedValue(new Error('R2 storage error'))
-        }
+        } as any
       };
 
       const failingService = new DataPersistenceService(failingBindings);
@@ -379,7 +379,7 @@ describe('DataPersistenceService', () => {
         CHAT_KV: {
           ...mockBindings.CHAT_KV,
           put: vi.fn().mockRejectedValue(new Error('KV storage error'))
-        }
+        } as any
       };
 
       const failingService = new DataPersistenceService(failingBindings);
@@ -418,7 +418,7 @@ describe('DataPersistenceService', () => {
         }
       };
 
-      const corruptedService = new DataPersistenceService(corruptedBindings);
+      const corruptedService = new DataPersistenceService(corruptedBindings as any);
 
       await expect(corruptedService.restoreFromBackup(testBackupId))
         .rejects.toThrow('Backup data integrity check failed');
@@ -441,8 +441,8 @@ describe('DataPersistenceService', () => {
       const sessionIds = [generateSessionId()];
       
       // Archive a conversation first
-      const memory = createTestMemory(sessionIds[0]);
-      const session = createTestSession(sessionIds[0]);
+      const memory = createTestMemory(sessionIds[0]!);
+      const session = createTestSession(sessionIds[0]!);
       await service.archiveConversation(memory, session);
 
       // Create backup (which uses checksum calculation)

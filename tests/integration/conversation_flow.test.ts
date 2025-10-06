@@ -72,15 +72,13 @@ describe('End-to-End Conversation Flows', () => {
     sessionId = `integration_test_${Date.now()}`;
     
     // Initialize Durable Object
-    memoryDO = Object.create(SessionMemoryDO.prototype);
-    memoryDO.state = mockState;
-    memoryDO.env = mockEnv;
-    memoryDO.sessionId = sessionId;
+    memoryDO = new SessionMemoryDO(mockState as any, mockEnv);
+    (memoryDO as any).sessionId = sessionId;
     
     // Initialize tool router with tools
     toolRouter = new ToolRouter();
-    toolRouter.registerTool(new KnowledgeBaseTool(mockEnv));
-    toolRouter.registerTool(new TicketingTool(mockEnv));
+    toolRouter.registerTool(new KnowledgeBaseTool());
+    toolRouter.registerTool(new TicketingTool());
     
     // Initialize workflow service
     workflowService = new WorkflowService(mockEnv);
@@ -103,8 +101,8 @@ describe('End-to-End Conversation Flows', () => {
       expect(initResponse.status).toBe(200);
       
       const sessionData = await initResponse.json();
-      expect(sessionData.id).toBeDefined();
-      expect(sessionData.status).toBe('active');
+      expect((sessionData as any).id).toBeDefined();
+      expect((sessionData as any).status).toBe('active');
 
       // Step 2: User asks initial question
       const userMessage: ChatMessage = {
@@ -343,7 +341,7 @@ describe('End-to-End Conversation Flows', () => {
       });
 
       // Mock successful archiving
-      vi.mocked(mockEnv.ARCHIVE_R2.put).mockResolvedValue(undefined);
+      vi.mocked(mockEnv.ARCHIVE_R2.put).mockResolvedValue(undefined as any);
       vi.mocked(mockEnv.CHAT_KV.put).mockResolvedValue(undefined);
 
       // Archive the session
@@ -379,7 +377,7 @@ describe('End-to-End Conversation Flows', () => {
         sessionId,
         archivedAt: Date.now() - 1000,
         messageCount: 3
-      }));
+      }) as any);
 
       vi.mocked(mockEnv.ARCHIVE_R2.get).mockResolvedValue({
         text: async () => JSON.stringify(archivedData)

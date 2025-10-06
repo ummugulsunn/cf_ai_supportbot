@@ -22,6 +22,7 @@ const mockEnv: WorkerBindings = {
   MEMORY_DO: mockMemoryDO as any,
   CHAT_KV: {} as any,
   ARCHIVE_R2: {} as any,
+  WORKFLOWS: {} as any,
   OPENAI_API_KEY: 'test-openai-key',
   MAX_TOKENS: '4096'
 };
@@ -77,7 +78,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(result.message.content).toBe('Hello! How can I help you today?');
@@ -129,7 +130,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(result.message.content).toBe('I can help you with that using OpenAI fallback.');
@@ -162,7 +163,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(500);
       expect(result.error.code).toBe('AI_PROCESSING_FAILED');
@@ -185,7 +186,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(result.sessionId).toMatch(/^sess_\d+_[a-z0-9]+$/);
@@ -203,7 +204,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(400);
       expect(result.error.code).toBe('INVALID_INPUT');
@@ -220,7 +221,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(400);
       expect(result.error.code).toBe('INVALID_INPUT');
@@ -327,7 +328,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(500);
       expect(result.error.code).toBe('AI_PROCESSING_FAILED');
@@ -348,7 +349,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, envWithoutOpenAI, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(500);
       expect(result.error.code).toBe('AI_PROCESSING_FAILED');
@@ -369,7 +370,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(result.id).toBe('test-session');
@@ -384,7 +385,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(result.success).toBe(true);
@@ -396,7 +397,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(400);
       expect(result.error.code).toBe('INVALID_SESSION_ID');
@@ -432,7 +433,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(result.overall).toBe('healthy');
@@ -456,7 +457,7 @@ describe('API Worker AI Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(result.requestId).toBeDefined();
       expect(typeof result.requestId).toBe('string');

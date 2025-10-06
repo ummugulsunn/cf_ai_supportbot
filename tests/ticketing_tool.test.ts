@@ -331,8 +331,8 @@ describe('TicketingTool', () => {
       
       expect(result.success).toBe(true);
       expect(result.metadata).toHaveProperty('updatedFields');
-      expect(result.metadata.updatedFields).toContain('status');
-      expect(result.metadata.updatedFields).toContain('resolution');
+      expect(result.metadata?.updatedFields).toContain('status');
+      expect(result.metadata?.updatedFields).toContain('resolution');
     });
   });
 

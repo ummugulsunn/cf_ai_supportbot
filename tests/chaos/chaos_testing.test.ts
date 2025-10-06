@@ -12,28 +12,39 @@ describe('Chaos Testing Suite', () => {
 
   beforeEach(() => {
     // Setup mock environment with failure injection capabilities
-    mockEnv = {
+    mockEnv = ({
       AI: {
-        run: vi.fn()
-      },
+        run: vi.fn(),
+        aiGatewayLogId: 'test-log-id',
+        gateway: {} as any,
+        autorag: {} as any,
+        models: {} as any,
+        toMarkdown: vi.fn()
+      } as any,
       CHAT_KV: {
         get: vi.fn(),
         put: vi.fn(),
         delete: vi.fn(),
-        list: vi.fn()
-      },
+        list: vi.fn(),
+        getWithMetadata: vi.fn()
+      } as any,
       ARCHIVE_R2: {
         get: vi.fn(),
         put: vi.fn(),
         delete: vi.fn(),
-        list: vi.fn()
-      },
+        list: vi.fn(),
+        head: vi.fn(),
+        createMultipartUpload: vi.fn(),
+        resumeMultipartUpload: vi.fn()
+      } as any,
       MEMORY_DO: {
         get: vi.fn(),
         newUniqueId: vi.fn(() => ({ toString: () => 'test-id' }))
-      },
-      WORKFLOWS: {} as any
-    } as WorkerBindings;
+      } as any,
+      WORKFLOWS: {} as any,
+      OPENAI_API_KEY: 'test-key',
+      MAX_TOKENS: '1000'
+    }) as WorkerBindings;
 
     mockState = {
       storage: {
@@ -215,7 +226,7 @@ describe('Chaos Testing Suite', () => {
       // Should handle gracefully even with multiple failures
       expect(response.status).toBeLessThan(500);
       
-      const result = await response.json();
+      const result = await response.json() as any;
       expect(result).toHaveProperty('error');
       expect(result.error).toContain('service');
     });

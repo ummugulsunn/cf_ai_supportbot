@@ -237,7 +237,7 @@ export class PerformanceOptimizer {
 
   private getMemoryUsage(): number {
     // Approximate memory usage - in real implementation would use more accurate methods
-    return performance.memory?.usedJSHeapSize || 0;
+    return (performance as any).memory?.usedJSHeapSize || 0;
   }
 
   private optimizeAIContext(context: { messageLength: number; historyLength: number; sessionId: string }) {
@@ -326,9 +326,9 @@ export class PerformanceMonitor {
 
     return {
       avg: values.reduce((sum, v) => sum + v, 0) / len,
-      p50: sorted[Math.floor(len * 0.5)],
-      p95: sorted[Math.floor(len * 0.95)],
-      p99: sorted[Math.floor(len * 0.99)]
+      p50: sorted[Math.floor(len * 0.5)]!,
+      p95: sorted[Math.floor(len * 0.95)]!,
+      p99: sorted[Math.floor(len * 0.99)]!
     };
   }
 

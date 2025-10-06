@@ -233,7 +233,7 @@ export async function demonstrateMonitoring(): Promise<void> {
   console.log(`  Rate Limit Hits: ${finalMetrics.rateLimitHits.value}`);
 
   await logger.info('Demo completed successfully', {
-    totalDuration: Date.now() - parseInt(requestId.split('-')[0], 16),
+    totalDuration: Date.now() - parseInt(requestId.split('-')[0]!, 16),
     metricsRecorded: true,
     alertsEvaluated: true,
     healthChecked: true

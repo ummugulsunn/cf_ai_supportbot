@@ -68,7 +68,7 @@ describe('Message Processing Pipeline Integration', () => {
     });
 
     const response = await worker.fetch(request, mockEnv, {} as any);
-    const result = await response.json();
+    const result = await response.json() as any;
 
     // Verify response structure
     expect(response.status).toBe(200);
@@ -124,13 +124,13 @@ describe('Message Processing Pipeline Integration', () => {
     });
 
     // Verify memory operations
-    const addMessageCalls = mockDOStub.fetch.mock.calls.filter(call => 
+    const addMessageCalls = mockDOStub.fetch.mock.calls.filter((call: any) => 
       call[1]?.body?.includes('"action":"addMessage"')
     );
     expect(addMessageCalls).toHaveLength(2); // User message + Assistant message
 
     // Verify context retrieval
-    const contextCalls = mockDOStub.fetch.mock.calls.filter(call => 
+    const contextCalls = mockDOStub.fetch.mock.calls.filter((call: any) => 
       call[0].includes('action=context')
     );
     expect(contextCalls).toHaveLength(1);
@@ -227,7 +227,7 @@ describe('Message Processing Pipeline Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      const result = await response.json();
+      const result = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(result.message.content).toContain('reset your password');
@@ -285,7 +285,7 @@ describe('Message Processing Pipeline Integration', () => {
     // Should still fail due to initial DO error
     expect(response.status).toBe(500);
     
-    const result = await response.json();
+    const result = await response.json() as any;
     expect(result.error.code).toBe('CHAT_ERROR');
     expect(result.error.retryable).toBe(true);
   });
@@ -309,7 +309,7 @@ describe('Message Processing Pipeline Integration', () => {
     });
 
     const response = await worker.fetch(request, mockEnv, {} as any);
-    const result = await response.json();
+    const result = await response.json() as any;
 
     expect(response.status).toBe(200);
     expect(result.message.content).toContain('quite long');

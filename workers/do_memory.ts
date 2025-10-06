@@ -75,12 +75,12 @@ export class SessionMemoryDO implements DurableObject, MemoryOperations {
   }
 
   private async handlePost(request: Request): Promise<Response> {
-    const body = await request.json();
+    const body = await request.json() as any;
     const action = body.action;
 
     switch (action) {
       case 'addMessage':
-        await this.addMessage(body.message);
+        await this.addMessage(body.message as any);
         return new Response(JSON.stringify({ success: true }));
       
       case 'generateSummary':
@@ -88,7 +88,7 @@ export class SessionMemoryDO implements DurableObject, MemoryOperations {
         return new Response(JSON.stringify({ summary }));
       
       case 'updateSession':
-        await this.updateSessionState(body.updates);
+        await this.updateSessionState(body.updates as any);
         return new Response(JSON.stringify({ success: true }));
       
       case 'archiveSession':
@@ -96,7 +96,7 @@ export class SessionMemoryDO implements DurableObject, MemoryOperations {
         return new Response(JSON.stringify({ archiveKey }));
       
       case 'restoreSession':
-        const restored = await this.restoreSession(body.sessionId);
+        const restored = await this.restoreSession(body.sessionId as any);
         return new Response(JSON.stringify({ restored }));
       
       default:

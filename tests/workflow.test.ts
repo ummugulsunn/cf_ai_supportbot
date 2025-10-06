@@ -464,7 +464,7 @@ describe('Workflow Definitions', () => {
       
       expect(workflow.id).toBe('complex_query_processing');
       expect(workflow.steps.length).toBeGreaterThan(0);
-      expect(workflow.steps[0].input.query).toContain('Test query');
+      expect(workflow.steps[0]?.input.query).toContain('Test query');
     });
 
     it('should create tool chain workflow', () => {
@@ -474,9 +474,9 @@ describe('Workflow Definitions', () => {
       ];
       
       const input = {
-        toolCalls,
-        context: mockContext,
-        parallelExecution: false
+        tools: ['kb.search', 'create_ticket'],
+        query: 'Test query',
+        context: mockContext
       };
       
       const workflow = createToolChainWorkflow(input);
@@ -488,6 +488,7 @@ describe('Workflow Definitions', () => {
     it('should create escalation workflow', () => {
       const input = {
         issue: 'Test issue',
+        priority: 'urgent' as const,
         context: mockContext,
         ticketData: {
           title: 'Test Ticket',

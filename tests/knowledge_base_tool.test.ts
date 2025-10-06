@@ -39,7 +39,7 @@ describe('KnowledgeBaseTool', () => {
     });
 
     it('should reject non-string query', async () => {
-      const result = await tool.execute({ query: 123 }, mockContext);
+      const result = await tool.execute({ query: 123 as any }, mockContext);
       
       expect(result.success).toBe(false);
       expect(result.error).toContain('Invalid query parameter');
@@ -177,14 +177,14 @@ describe('KnowledgeBaseTool', () => {
 
   describe('Error Handling', () => {
     it('should handle missing query parameter', async () => {
-      const result = await tool.execute({}, mockContext);
+      const result = await tool.execute({} as any, mockContext);
       
       expect(result.success).toBe(false);
       expect(result.error).toContain('Invalid query parameter');
     });
 
     it('should handle null parameters', async () => {
-      const result = await tool.execute(null, mockContext);
+      const result = await tool.execute(null as any, mockContext);
       
       expect(result.success).toBe(false);
       expect(result.error).toContain('Invalid query parameter');

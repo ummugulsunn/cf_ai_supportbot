@@ -191,7 +191,7 @@ export class WorkflowEngine {
 
     for (let i = 0; i < execution.steps.length; i++) {
       execution.currentStepIndex = i;
-      const step = execution.steps[i];
+      const step = execution.steps[i]!;
       const handler = this.stepHandlers.get(step.name);
 
       if (!handler) {
@@ -298,7 +298,7 @@ export class WorkflowEngine {
     const completedSteps = execution.steps.filter(step => step.status === 'completed');
     
     for (let i = completedSteps.length - 1; i >= 0; i--) {
-      const step = completedSteps[i];
+      const step = completedSteps[i]!;
       const handler = this.stepHandlers.get(step.name);
 
       if (handler?.compensate) {

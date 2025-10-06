@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // Global test setup for frontend tests
 global.WebSocket = class MockWebSocket {

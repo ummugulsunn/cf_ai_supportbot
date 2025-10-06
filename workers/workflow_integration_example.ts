@@ -163,7 +163,7 @@ async function handleSimpleQuery(
     });
     
     return {
-      response: aiResponse.response || 'I apologize, but I was unable to process your request.',
+      response: (aiResponse as any).response || 'I apologize, but I was unable to process your request.',
       workflowExecuted: false
     };
   } catch (error) {
@@ -217,8 +217,7 @@ export async function processMessage(
     role: 'assistant',
     timestamp: Date.now(),
     metadata: {
-      workflowExecuted: result.workflowExecuted,
-      executionId: result.executionId
+      toolCalls: []
     }
   };
   

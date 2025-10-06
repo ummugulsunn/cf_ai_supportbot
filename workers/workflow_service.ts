@@ -56,10 +56,10 @@ export class WorkflowService implements SupportWorkflow {
 
   // Execute a chain of tools
   async executeToolChain(toolCalls: ToolCall[]): Promise<WorkflowResult> {
-    const input: ToolChainInput = {
-      toolCalls,
-      context: {} as ConversationContext, // Will be set from workflow context
-      parallelExecution: false // Sequential by default
+    const input = {
+      tools: toolCalls.map(tc => tc.name),
+      query: 'Execute tool chain',
+      context: {} as ConversationContext
     };
 
     const workflowDef = createToolChainWorkflow(input);
@@ -81,8 +81,9 @@ export class WorkflowService implements SupportWorkflow {
     priority: string;
     category: string;
   }): Promise<WorkflowResult> {
-    const input: EscalationInput = {
+    const input = {
       issue: ticketData.issue,
+      priority: ticketData.priority as 'high' | 'urgent',
       context: ticketData.context,
       ticketData: {
         title: ticketData.title,
@@ -166,11 +167,11 @@ export class WorkflowService implements SupportWorkflow {
           
           switch (toolCall.name) {
             case 'kb.search':
-              return await this.executeKnowledgeBaseSearch(toolCall, context);
+              return await (this as any).executeKnowledgeBaseSearch(toolCall, context);
             case 'create_ticket':
-              return await this.executeTicketCreation(toolCall, context);
+              return await (this as any).executeTicketCreation(toolCall, context);
             case 'fetch_status':
-              return await this.executeStatusFetch(toolCall, context);
+              return await (this as any).executeStatusFetch(toolCall, context);
             default:
               throw new Error(`Unknown tool: ${toolCall.name}`);
           }

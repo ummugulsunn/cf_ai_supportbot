@@ -149,7 +149,7 @@ describe('Performance Validation Tests', () => {
 
   describe('Memory Usage Validation', () => {
     it('should maintain reasonable memory usage during operations', async () => {
-      const initialMemory = performance.memory?.usedJSHeapSize || 0;
+      const initialMemory = (performance as any).memory?.usedJSHeapSize || 0;
 
       // Perform multiple operations
       const operations = Array.from({ length: 50 }, async (_, i) => {
@@ -166,7 +166,7 @@ describe('Performance Validation Tests', () => {
 
       await Promise.all(operations);
 
-      const finalMemory = performance.memory?.usedJSHeapSize || 0;
+      const finalMemory = (performance as any).memory?.usedJSHeapSize || 0;
       const memoryIncrease = finalMemory - initialMemory;
 
       // Memory assertions

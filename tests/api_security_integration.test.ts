@@ -62,7 +62,7 @@ describe('API Security Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, mockCtx);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(data.security).toBeDefined();
@@ -84,7 +84,7 @@ describe('API Security Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, mockCtx);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(response.status).toBe(429);
       expect(data.error.code).toBe('SECURITY_VIOLATION');
@@ -105,13 +105,13 @@ describe('API Security Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, mockCtx);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(data.security.piiDetected).toBe(true);
       
       // Check that the DO received the filtered message
-      const doStub = mockEnv.MEMORY_DO.get('do-id');
+      const doStub = mockEnv.MEMORY_DO.get({ toString: () => 'do-id' } as any);
       expect(doStub.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
@@ -154,7 +154,7 @@ describe('API Security Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, mockCtx);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(response.status).toBe(429);
       expect(data.error.code).toBe('SECURITY_VIOLATION');
@@ -175,7 +175,7 @@ describe('API Security Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, mockCtx);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(response.status).toBe(429);
       expect(data.error.code).toBe('SECURITY_VIOLATION');
@@ -193,7 +193,7 @@ describe('API Security Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, mockCtx);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(response.status).toBe(429);
       expect(data.error.code).toBe('SECURITY_VIOLATION');
@@ -219,7 +219,7 @@ describe('API Security Integration', () => {
       expect(response.status).toBe(200);
       
       // Check that the DO received sanitized content
-      const doStub = mockEnv.MEMORY_DO.get('do-id');
+      const doStub = mockEnv.MEMORY_DO.get({ toString: () => 'do-id' } as any);
       expect(doStub.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
@@ -272,7 +272,7 @@ describe('API Security Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, mockCtx);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.requestId).toBeTruthy();
       expect(typeof data.requestId).toBe('string');
@@ -288,7 +288,7 @@ describe('API Security Integration', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, mockCtx);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.requestId).toBeTruthy();
       expect(typeof data.requestId).toBe('string');

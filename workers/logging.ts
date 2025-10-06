@@ -203,8 +203,8 @@ export class MetricsCollector {
 
     // Update bucket counts
     for (let i = 0; i < histogram.buckets.length; i++) {
-      if (value <= histogram.buckets[i]) {
-        histogram.counts[i] += 1;
+      if (value <= histogram.buckets[i]!) {
+        histogram.counts[i]! += 1;
       }
     }
 

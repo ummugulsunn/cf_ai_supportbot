@@ -10,12 +10,14 @@ export interface SupportWorkflowInput {
   query: string;
   priority?: 'low' | 'medium' | 'high' | 'urgent';
   context?: any;
+  tools?: string[];
 }
 
 export interface ToolChainInput {
   tools: string[];
   query: string;
   context?: any;
+  toolCalls?: any[];
 }
 
 export interface EscalationInput {
@@ -343,12 +345,12 @@ export function createComplexQueryWorkflow(input: SupportWorkflowInput): Workflo
   const workflow = { ...COMPLEX_QUERY_WORKFLOW };
   
   // Customize steps based on input
-  workflow.steps[0].input.query = `Analyze this user query: "${input.query}"`;
-  workflow.steps[2].input.query = `Generate response for: "${input.query}" with priority: ${input.priority || 'medium'}`;
+  workflow.steps[0]!.input.query = `Analyze this user query: "${input.query}"`;
+  workflow.steps[2]!.input.query = `Generate response for: "${input.query}" with priority: ${input.priority || 'medium'}`;
   
   if (input.tools && input.tools.length > 0) {
     // Add specific tool steps
-    input.tools.forEach((toolName, index) => {
+    input.tools.forEach((toolName: any, index: any) => {
       workflow.steps.splice(1 + index, 0, {
         id: `tool_${toolName}`,
         name: 'execute_tool',
@@ -375,7 +377,7 @@ export function createToolChainWorkflow(input: ToolChainInput): WorkflowDefiniti
   // Replace dynamic steps with actual tool calls
   workflow.steps = workflow.steps.filter(step => step.name !== 'execute_tool');
   
-  input.toolCalls.forEach((toolCall, index) => {
+  input.toolCalls?.forEach((toolCall: any, index: any) => {
     workflow.steps.splice(1 + index, 0, {
       id: `tool_${index}`,
       name: 'execute_tool',
@@ -393,9 +395,9 @@ export function createEscalationWorkflow(input: EscalationInput): WorkflowDefini
   const workflow = { ...ESCALATION_WORKFLOW };
   
   // Customize steps based on input
-  workflow.steps[0].input.query = `Assess urgency for issue: "${input.issue}"`;
-  workflow.steps[1].input.toolCall.parameters = input.ticketData;
-  workflow.steps[4].input.query = `Generate handoff summary for: "${input.issue}"`;
+  workflow.steps[0]!.input.query = `Assess urgency for issue: "${input.issue}"`;
+  workflow.steps[1]!.input.toolCall.parameters = input.ticketData;
+  workflow.steps[4]!.input.query = `Generate handoff summary for: "${input.issue}"`;
   
   // Adjust timeout based on priority
   if (input.ticketData.priority === 'urgent') {

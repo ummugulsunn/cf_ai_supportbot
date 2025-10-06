@@ -62,7 +62,7 @@ async function mockAPIHandler(request: Request, bindings: WorkerBindings) {
         logger,
         metrics,
         async () => {
-          return await bindings.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+          return await bindings.AI.run('@cf/meta/llama-3.1-8b-instruct' as any, {
             messages: [{ role: 'user', content: 'Hello' }],
             max_tokens: 100
           });
@@ -86,7 +86,7 @@ async function mockAPIHandler(request: Request, bindings: WorkerBindings) {
       );
       
       return new Response(JSON.stringify({
-        message: { content: aiResponse.response, role: 'assistant' },
+        message: { content: (aiResponse as any).response, role: 'assistant' },
         sessionId: 'test-session'
       }), {
         headers: { 'Content-Type': 'application/json' }
@@ -256,12 +256,12 @@ describe('Monitoring Integration', () => {
     });
 
     // Should have logged multiple request starts and completions
-    const requestStartLogs = consoleSpy.info.mock.calls.filter(call =>
+    const requestStartLogs = consoleSpy.info.mock.calls.filter((call: any) =>
       call[0].includes('"message":"Request started"')
     );
     expect(requestStartLogs.length).toBe(5);
 
-    const requestCompleteLogs = consoleSpy.info.mock.calls.filter(call =>
+    const requestCompleteLogs = consoleSpy.info.mock.calls.filter((call: any) =>
       call[0].includes('"message":"Request completed successfully"')
     );
     expect(requestCompleteLogs.length).toBe(5);
@@ -289,7 +289,7 @@ describe('Monitoring Integration', () => {
     expect(response.status).toBe(200);
 
     // Should log latency information
-    const latencyLogs = consoleSpy.info.mock.calls.filter(call =>
+    const latencyLogs = consoleSpy.info.mock.calls.filter((call: any) =>
       call[0].includes('"latency"') && call[0].includes('"message":"Request completed successfully"')
     );
     expect(latencyLogs.length).toBeGreaterThan(0);

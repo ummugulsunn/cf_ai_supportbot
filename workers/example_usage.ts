@@ -56,10 +56,10 @@ export async function exampleUsage(memoryDO: SessionMemoryDO) {
   const context = await contextResponse.json();
   
   console.log('Conversation context:', {
-    sessionId: context.sessionId,
-    summary: context.summary,
-    messageCount: context.recentMessages.length,
-    topics: context.activeTopics
+    sessionId: (context as any).sessionId,
+    summary: (context as any).summary,
+    messageCount: (context as any).recentMessages.length,
+    topics: (context as any).activeTopics
   });
   
   // Example 4: Generate summary
@@ -74,7 +74,7 @@ export async function exampleUsage(memoryDO: SessionMemoryDO) {
   const summaryResponse = await memoryDO.fetch(summaryRequest);
   const summaryData = await summaryResponse.json();
   
-  console.log('Generated summary:', summaryData.summary);
+  console.log('Generated summary:', (summaryData as any).summary);
   
   // Example 5: Get recent messages
   const messagesRequest = new Request(`http://localhost/session/${sessionId}?action=messages&limit=10`, {
@@ -84,13 +84,13 @@ export async function exampleUsage(memoryDO: SessionMemoryDO) {
   const messagesResponse = await memoryDO.fetch(messagesRequest);
   const messagesData = await messagesResponse.json();
   
-  console.log('Recent messages:', messagesData.messages);
+  console.log('Recent messages:', (messagesData as any).messages);
   
   return {
     sessionId,
     context,
-    summary: summaryData.summary,
-    messages: messagesData.messages
+    summary: (summaryData as any).summary,
+    messages: (messagesData as any).messages
   };
 }
 

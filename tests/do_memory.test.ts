@@ -57,14 +57,11 @@ describe('SessionMemoryDO', () => {
   
   beforeEach(() => {
     mockState = new MockDurableObjectState();
-    // Create DO without initialization for testing
-    memoryDO = Object.create(SessionMemoryDO.prototype);
-    memoryDO.state = mockState;
-    memoryDO.env = mockEnv;
-    memoryDO.sessionId = 'test-session';
+    // Create DO instance for testing
+    memoryDO = new SessionMemoryDO(mockState as any, mockEnv);
     
-    // Initialize persistence service manually for testing
-    memoryDO.persistenceService = new DataPersistenceService(mockEnv);
+    // Set session ID via private property access for testing
+    (memoryDO as any).sessionId = 'test-session';
     
     vi.clearAllMocks();
   });
@@ -77,7 +74,7 @@ describe('SessionMemoryDO', () => {
       });
       
       const response = await memoryDO.fetch(request);
-      const data = await response.json();
+      const data = await response.json() as any;
       
       expect(response.status).toBe(200);
       expect(data.id).toBeDefined();
@@ -101,7 +98,7 @@ describe('SessionMemoryDO', () => {
       });
       
       const response = await memoryDO.fetch(request);
-      const data = await response.json();
+      const data = await response.json() as any;
       
       expect(data.id).toBe('test-session');
       expect(data.status).toBe('active');
@@ -150,7 +147,7 @@ describe('SessionMemoryDO', () => {
       });
 
       const response = await memoryDO.fetch(request);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
@@ -158,7 +155,7 @@ describe('SessionMemoryDO', () => {
       // Verify message was stored
       const memory = mockState.getStorageData('memory') as ConversationMemory;
       expect(memory.messages).toHaveLength(1);
-      expect(memory.messages[0].content).toBe('Hello, I need help with my account');
+      expect(memory.messages[0]?.content).toBe('Hello, I need help with my account');
     });
 
     it('should generate message ID if not provided', async () => {
@@ -183,8 +180,8 @@ describe('SessionMemoryDO', () => {
 
       const memory = mockState.getStorageData('memory') as ConversationMemory;
       expect(memory.messages).toHaveLength(1);
-      expect(memory.messages[0].id).toBeDefined();
-      expect(memory.messages[0].id).toMatch(/^msg_/);
+      expect(memory.messages[0]?.id).toBeDefined();
+      expect(memory.messages[0]?.id).toMatch(/^msg_/);
     });
 
     it('should retrieve recent messages with limit', async () => {
@@ -206,11 +203,11 @@ describe('SessionMemoryDO', () => {
       });
 
       const response = await memoryDO.fetch(request);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(data.messages).toHaveLength(5);
-      expect(data.messages[4].content).toBe('Message 14'); // Last message
+      expect(data.messages[4]?.content).toBe('Message 14'); // Last message
     });
   });
 
@@ -268,7 +265,7 @@ describe('SessionMemoryDO', () => {
       });
 
       const response = await memoryDO.fetch(request);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(data.sessionId).toBe('test-session');
@@ -293,7 +290,7 @@ describe('SessionMemoryDO', () => {
       });
 
       const response = await memoryDO.fetch(request);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(data.summary).toContain('2 user messages');
@@ -358,7 +355,7 @@ describe('SessionMemoryDO', () => {
 
       const updatedMemory = mockState.getStorageData('memory') as ConversationMemory;
       expect(updatedMemory.messages).toHaveLength(100); // Should be trimmed to MAX_MESSAGES
-      expect(updatedMemory.messages[99].id).toBe('msg-new'); // New message should be last
+      expect(updatedMemory.messages[99]?.id).toBe('msg-new'); // New message should be last
     });
   });
 
@@ -396,7 +393,7 @@ describe('SessionMemoryDO', () => {
       });
 
       const response = await memoryDO.fetch(request);
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
@@ -575,8 +572,8 @@ describe('SessionMemoryDO', () => {
 
       expect(response.status).toBe(200);
       expect(data.archives).toHaveLength(2);
-      expect(data.archives[0].sessionId).toBe('session-1');
-      expect(data.archives[1].sessionId).toBe('session-2');
+      expect(data.archives[0]?.sessionId).toBe('session-1');
+      expect(data.archives[1]?.sessionId).toBe('session-2');
     });
 
     it('should handle archiving errors gracefully', async () => {

@@ -105,7 +105,7 @@ async function demonstrateSecurityFeatures() {
 }
 
 // Run demo if this file is executed directly
-if (import.meta.main) {
+if ((import.meta as any).main) {
   demonstrateSecurityFeatures().catch(console.error);
 }
 
